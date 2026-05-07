@@ -1,0 +1,10 @@
+# vsim -c gl_check 
+# Start time: 10:11:51 on May 07,2026
+# ** Note: (vsim-3812) Design is being optimized...
+# ** Error: (vopt-13130) Failed to find design unit gl_check.
+#         Searched libraries:
+#             work
+# Optimization failed
+# Error loading design
+# End time: 10:11:52 on May 07,2026, Elapsed time: 0:00:01
+# Errors: 1, Warnings: 0

@@ -15,9 +15,9 @@ reg [1:0]count;
 reg [N-1 : 0]tmp_a, tmp_b;  // multiplication sampling 
 reg [(2*N)-1 : 0]tmp_res;
 
-assign COUT = ((CMD == 'd0 || CMD == 'd2) && MODE == 1'b1 )? RES[N] : 1'b0;                                                                                                    // unsigned ADD/ADD_CIN
+assign COUT = ((CMD == 'd0 || CMD == 'd2) && MODE == 1'b1 )? ((RES[(2*N)-1 : N] > 8'd0)? 1'b1 : 1'b0) : 1'b0;                                                                                                    // unsigned ADD/ADD_CIN
 assign {G,L,E} = ((CMD == 'd8 || CMD == 'd11 || CMD == 'd12) && MODE == 1'b1 )? ({$signed(OPA)> $signed(OPB), $signed(OPA) < $signed(OPB), $signed(OPA) == $signed(OPB)}): 3'b0; // COMP, signed ADD/SUB
-assign OFLOW = ((CMD == 'd1 || CMD == 'd3 || CMD == 'd11 || CMD == 'd12) && MODE == 1'b1) ? (~RES[N]) : 1'b0;                                                                  // unsigned SUB/SUB_CIN, signed SUB/ADD
+assign OFLOW = ((CMD == 'd1 || CMD == 'd3 || CMD == 'd11 || CMD == 'd12) && MODE == 1'b1) ? ((RES[(2*N)-1: N] > 8'd0)? 1'b1 : 1'b0) : 1'b0;                                                                  // unsigned SUB/SUB_CIN, signed SUB/ADD
 
 always@(posedge CLK)begin
         if(RST)begin
@@ -86,7 +86,7 @@ always@(posedge CLK)begin
 
                        'd9: begin                              // Inc & Multiply
                                         ERR <= (INP_VALID  == 2'b11)? 1'b0: 1'b1;
-                                                        {tmp_a, tmp_b} <=(count == 2'd0 || count == 2'd2)? {OPA, OPB}: {tmp_a, tmp_b};
+                                                        {tmp_a, tmp_b} <=(count == 2'd0 || count >= 2'd2)? {OPA, OPB}: {tmp_a, tmp_b};
                                         RES <=(count >= 2'd1)?((tmp_a + 1'b1)* (tmp_b + 1'b1)):RES;
                         end
                         'd10 : begin                            // Shift & Multiply 

@@ -1,5 +1,4 @@
 `timescale 1ns/1ps
-`include "alu_main.v"
 
 module alu_tb;
 
@@ -59,7 +58,7 @@ module alu_tb;
                     4'd1: begin   // unsigned SUB
                         ref_RES   = a - b;
                         ref_ERR   = (iv == 2'b11) ? 0 : 1;
-                        ref_OFLOW = ~ref_RES[N];
+                        ref_OFLOW = (ref_RES > 16'h00ff )? 1'b1:1'b0;
                     end
                     4'd2: begin   // ADD with CIN
                         ref_RES  = a + b + cin;
@@ -69,7 +68,7 @@ module alu_tb;
                     4'd3: begin   // SUB with CIN
                         ref_RES   = a - b - cin;
                         ref_ERR   = (iv == 2'b11) ? 0 : 1;
-                        ref_OFLOW = ~ref_RES[N];
+                        ref_OFLOW = (ref_RES > 16'h00ff )? 1'b1:1'b0;
                     end
                     4'd4: begin   // INC_A
                         ref_RES = a + 1;
@@ -97,12 +96,12 @@ module alu_tb;
                     4'd11: begin  // Signed ADD
                         ref_RES = $signed({{8{a[N-1]}},a}) + $signed({{8{b[N-1]}},b});
                         ref_ERR = (iv == 2'b11) ? 0 : 1;
-                        ref_OFLOW = ~ref_RES[N];
+                        ref_OFLOW = (ref_RES > 16'h00ff )? 1'b1:1'b0;
                     end
                     4'd12: begin  // Signed SUB
                         ref_RES = $signed({{8{a[N-1]}},a}) - $signed({{8{b[N-1]}},b});
                         ref_ERR = (iv == 2'b11) ? 0 : 1;
-                        ref_OFLOW = ~ref_RES[N];
+                        ref_OFLOW = (ref_RES > 16'h00ff )? 1'b1:1'b0;
                     end
                     default: ; // hold previous (not checked in these tests)
                 endcase
@@ -170,7 +169,7 @@ module alu_tb;
         end
     endtask
 
-    // Helper: apply stimulus for single-cycle ops, clock once,
+    // Driver
     task apply_and_check;
         input [63:0]  tid;       // test number (for display)
         input [N-1:0] a, b;
@@ -613,7 +612,8 @@ module alu_tb;
             end
         end
 
-        // ---- Summary ----
+
+      
         $display("\n=================================================");
         $display("  RESULTS:  PASS=%0d   FAIL=%0d   TOTAL=%0d",
                  pass_count, fail_count, pass_count+fail_count);
@@ -622,9 +622,8 @@ module alu_tb;
         $finish;
     end
 
-    // --------------------------------------------------------
-    // Timeout watchdog (100 us)
-    // --------------------------------------------------------
+  
+    // Timeout(100 us)
     initial begin
         #100000;
         $display("TIMEOUT \u2013 simulation did not finish.");
